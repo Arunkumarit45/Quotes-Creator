@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState} from 'react'
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Login({setToken}) {
     
     const[username,setUserName]=useState("");
     const[otp,setOtp]=useState("");
@@ -9,8 +9,11 @@ function Login() {
 
     const handleuserlogin = async (e) =>{
         
-        e.preventDefault();
-        
+       e.preventDefault();
+
+       let token;
+
+       try{
         const response = await fetch('https://assignment.stage.crafto.app/login',{
                                 method: "POST",
                                 headers: { 
@@ -22,19 +25,27 @@ function Login() {
         if(response.ok){
 
             const data = await response.json();
-            console.log('Token-' , data.token);
+            console.log('Token -' , data.token);
             sessionStorage.setItem("token", data.token)
             navigate('/quotes');
-        
+            token = data.token;
+            setToken(token);
         }else{
-        
+
             alert(" Login Failed ")
-            return;
+            throw new Error(`Login Failed With Status ${response.status}`)
         
         }
-
     }
-
+    catch(error){
+        console.error("Network Error During Login:", error)
+        alert("An Error Occured While Try to Login. Please Try Again.")
+    }
+    finally{
+        setToken(token);
+    }
+    }
+ 
     return (
         <div className='login-container'>
             
